@@ -417,16 +417,16 @@ Slurm lua bindings
 Includes the Slurm proctrack/lua and job_submit/lua plugin
 %endif
 
-%package seff
+%package -n %{pname}-seff%{PROJ_DELIM}
 Summary: Mail tool that includes job statistics in user notification email
-Group: Development/System
-Requires: slurm
-%description seff
+Group: ohpc/rms
+Requires: slurm%{PROJ_DELIM}
+%description -n %{pname}-seff%{PROJ_DELIM}
 Mail program used directly by the Slurm daemons. On completion of a job,
 wait for it's accounting information to be available and include that
 information in the email body.
 
-%package sjstat
+%package -n %{pname}-sjstat%{PROJ_DELIM}
 Summary: Perl tool to print Slurm job state information
 Group: ohpc/rms
 Requires: %{pname}%{PROJ_DELIM}
@@ -1055,7 +1055,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/topology_tree.so
 #############################################################################
 
-%files torque
+%files -n %{pname}-torque%{PROJ_DELIM}
 %defattr(-,root,root)
 %{_bindir}/pbsnodes
 %{_bindir}/qalter
