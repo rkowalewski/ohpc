@@ -130,6 +130,10 @@ BuildRequires: klogd sysconfig
 %endif
 %endif
 
+# 02/27/16 karl.w.schulz@intel.com - enable PMIx
+BuildRequires: pmix%{PROJ_DELIM}
+Requires: pmix%{PROJ_DELIM}
+
 Requires: %{pname}-plugins%{PROJ_DELIM}
 BuildConflicts: post-build-checks
 
