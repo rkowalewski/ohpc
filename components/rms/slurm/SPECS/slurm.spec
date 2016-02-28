@@ -1208,7 +1208,7 @@ fi
 %insserv_cleanup
 %endif
 
-%postun slurmdbd
+%postun -n %{pname}-slurmdbd%{PROJ_DELIM}
 if [ "$1" -gt 1 ]; then
     /etc/init.d/slurmdbd condrestart
 fi
