@@ -1,1 +1,2 @@
 %define _with_mysql  1
+%define slurm_with_pmix 1
