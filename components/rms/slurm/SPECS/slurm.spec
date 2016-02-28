@@ -1121,13 +1121,13 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 #############################################################################
 
-%files seff
+%files -n %{pname}-seff%{PROJ_DELIM}
 %defattr(-,root,root)
 %{_bindir}/seff
 %{_bindir}/smail
 #############################################################################
 
-%files sjstat
+%files -n %{pname}-sjstat%{PROJ_DELIM}
 %defattr(-,root,root)
 %{_bindir}/sjstat
 %{_mandir}/man1/sjstat*
