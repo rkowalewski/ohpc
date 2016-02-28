@@ -155,6 +155,11 @@ BuildRequires: readline-devel
 BuildRequires: openssl-devel >= 0.9.6 openssl >= 0.9.6
 %endif
 
+# karl.w.schulz@intel.com (02/28/16) - use mariadb on newer RHEL/CentOS distro
+%if 0%{?rhel_version} >= 700 || 0%{?centos_version} >= 700
+BuildRequires: mariadb-devel >= 5.0.0
+%endif
+
 %define use_mysql_devel %(perl -e '`rpm -q mariadb-devel`; print $?;')
 
 %if %{slurm_with mysql}
