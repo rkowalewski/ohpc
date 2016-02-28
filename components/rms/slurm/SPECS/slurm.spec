@@ -1071,7 +1071,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/spank_pbs.so
 #############################################################################
 
-%files openlava
+%files -n %{pname}-openlava%{PROJ_DELIM}
 %defattr(-,root,root)
 %{_bindir}/bjobs
 %{_bindir}/bkill
