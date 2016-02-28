@@ -834,6 +834,9 @@ touch $LIST
     test -f $RPM_BUILD_ROOT/lib64/security/pam_slurm_adopt.so		&&
 	echo /lib64/security/pam_slurm_adopt.so		>>$LIST
 %endif
+
+# karl.w.schulz@intel.com (02/28/16) - add docdir
+mkdir -p $RPM_BUILD_ROOT/%{_docdir}
 #############################################################################
 
 %clean
