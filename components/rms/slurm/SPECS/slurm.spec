@@ -514,7 +514,7 @@ make %{?_smp_mflags}
 %install
 rm -rf "$RPM_BUILD_ROOT"
 DESTDIR="$RPM_BUILD_ROOT" make install
-#DESTDIR="$RPM_BUILD_ROOT" make install-contrib
+DESTDIR="$RPM_BUILD_ROOT" make install-contrib
 
 %ifos aix5.3
    mv ${RPM_BUILD_ROOT}%{_bindir}/srun ${RPM_BUILD_ROOT}%{_sbindir}
