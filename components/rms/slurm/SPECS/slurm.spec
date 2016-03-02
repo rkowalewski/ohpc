@@ -534,7 +534,7 @@ DESTDIR="$RPM_BUILD_ROOT" make install-contrib
 %endif
 
 # 6/16/15 karl.w.schulz@intel.com - do not package Slurm's version of libpmi with OpenHPC.
-%if 0%{?OHPC_BUILD}
+%if 0%{?OHPC_BUILD2}
    rm -f $RPM_BUILD_ROOT/%{_libdir}/libpmi*
    rm -f $RPM_BUILD_ROOT/%{_libdir}/mpi_pmi2*
 %endif
