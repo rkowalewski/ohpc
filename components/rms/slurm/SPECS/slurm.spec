@@ -1,21 +1,3 @@
-#----------------------------------------------------------------------------bh-
-# This RPM .spec file is part of the OpenHPC project.
-#
-# It may have been modified from the default version supplied by the underlying
-# release package (if available) in order to apply patches, perform customized
-# build/install configurations, and supply additional files to support
-# desired integration conventions.
-#
-#----------------------------------------------------------------------------eh-
-
-%include %{_sourcedir}/OHPC_macros
-%include %{_sourcedir}/rpmmacros
-%{!?PROJ_DELIM: %define PROJ_DELIM -ohpc}
-
-%define pname slurm
-
-# $Id$
-#
 # Note that this package is not relocatable
 
 #
@@ -103,43 +85,19 @@
 %slurm_with_opt sgijob
 %endif
 
-Name:    %{pname}%{PROJ_DELIM}
+Name:    see META file
+Version: see META file
+Release: see META file
 
-Version: 15.08.8
-%define ver_exp 15-08-8
+Summary: Slurm Workload Manager
 
-Release:   %{?dist}
-Summary:   Slurm Workload Manager
+License: GPL
+Group: System Environment/Base
+Source: %{name}-%{version}-%{release}.tgz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}
+URL: http://slurm.schedmd.com/
 
-License:   GPL
-Group:     ohpc/rms
-Source:    slurm-master-03-02-2016.tar.gz
-#Source:    https://github.com/SchedMD/slurm/archive/%{pname}-%{ver_exp}.tar.gz
-Source1:   OHPC_macros
-BuildRoot: %{_tmppath}/%{pname}-%{version}-%{release}
-DocDir:    %{OHPC_PUB}/doc/contrib
-URL:       http://slurm.schedmd.com/
-
-# 8/11/14 karl.w.schulz@intel.com - update default runlevels
-Patch1:     %{pname}.initd.patch
-Patch2:     slurmctld.service.patch
-Patch3:     slurmdbd.service.patch
-Patch4:     slurmd.service.patch
-
-# 8/15/14 karl.w.schulz@intel.com - include prereq
-%if 0%{?sles_version} || 0%{?suse_version}
-PreReq: %{insserv_prereq} %{fillup_prereq}
-%if 0%{?suse_version} < 1315
-BuildRequires: klogd sysconfig
-%endif
-%endif
-
-# 02/27/16 karl.w.schulz@intel.com - enable PMIx
-BuildRequires: pmix%{PROJ_DELIM}
-Requires: pmix%{PROJ_DELIM}
-
-Requires: %{pname}-plugins%{PROJ_DELIM}
-BuildConflicts: post-build-checks
+Requires: slurm-plugins
 
 %ifos linux
 BuildRequires: python
@@ -169,38 +127,31 @@ BuildRequires: readline-devel
 %endif
 
 %if %{slurm_with openssl}
-%if 0%{?suse_version}
-BuildRequires: libopenssl0_9_8
-%else
 BuildRequires: openssl-devel >= 0.9.6 openssl >= 0.9.6
 %endif
-%endif
 
-#%if %{slurm_with mysql}
-%if 0%{?suse_version}
-%if 0%{?suse_version} >= 1200
-BuildRequires: libmysqlclient-devel
-%else
-BuildRequires: libmysql5
-%endif
-%else
-%if 0%{?rhel_version} >= 700 || 0%{?centos_version} >= 700
-BuildRequires: mariadb-devel >= 5.0.0
-%else
+%define use_mysql_devel %(perl -e '`rpm -q mariadb-devel`; print $?;')
+
+%if %{slurm_with mysql}
+%if %{use_mysql_devel}
 BuildRequires: mysql-devel >= 5.0.0
+%else
+BuildRequires: mariadb-devel >= 5.0.0
 %endif
 %endif
-#%endif
 
 %if %{slurm_with cray_alps}
+%if %{use_mysql_devel}
 BuildRequires: mysql-devel
+%else
+BuildRequires: mariadb-devel
+%endif
 %endif
 
 %if %{slurm_with cray}
 BuildRequires: cray-libalpscomm_cn-devel
 BuildRequires: cray-libalpscomm_sn-devel
 BuildRequires: libnuma-devel
-BuildConflicts: cray-libnuma1
 BuildRequires: libhwloc-devel
 BuildRequires: cray-libjob-devel
 BuildRequires: gtk2-devel
@@ -209,7 +160,11 @@ BuildRequires: pkg-config
 %endif
 
 %if %{slurm_with cray_network}
+%if %{use_mysql_devel}
 BuildRequires: mysql-devel
+%else
+BuildRequires: mariadb-devel
+%endif
 BuildRequires: cray-libalpscomm_cn-devel
 BuildRequires: cray-libalpscomm_sn-devel
 BuildRequires: hwloc-devel
@@ -286,57 +241,41 @@ scheduling and accounting modules
 %define _perlarchlibdir %{_prefix}%{_perlarchlib}
 %define _php_extdir %(php-config --extension-dir 2>/dev/null || echo %{_libdir}/php5)
 
-%package -n %{pname}-perlapi%{PROJ_DELIM}
+%package perlapi
 Summary: Perl API to Slurm
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM}
-%description -n %{pname}-perlapi%{PROJ_DELIM}
+Group: Development/System
+Requires: slurm
+%description perlapi
 Perl API package for Slurm.  This package includes the perl API to provide a
 helpful interface to Slurm through Perl
 
-%package -n %{pname}-devel%{PROJ_DELIM}
+%package devel
 Summary: Development package for Slurm
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM}
-%if 0%{?suse_version}
-BuildRequires:  pkg-config
-%else
-BuildRequires:  pkgconfig
-%endif
-
-%description -n %{pname}-devel%{PROJ_DELIM}
+Group: Development/System
+Requires: slurm
+%description devel
 Development package for Slurm.  This package includes the header files
 and static libraries for the Slurm API
 
 %if %{slurm_with auth_none}
-%package -n %{pname}-auth-none%{PROJ_DELIM}
+%package auth-none
 Summary: Slurm auth NULL implementation (no authentication)
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM}
-%description -n %{pname}-auth-none%{PROJ_DELIM}
+Group: System Environment/Base
+Requires: slurm
+%description auth-none
 Slurm NULL authentication module
-%endif
-
-%if %{slurm_with authd}
-%package -n %{pname}-auth-authd%{PROJ_DELIM}
-Summary: Slurm auth implementation using Brent Chun's authd
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM} authd
-%description -n %{pname}-auth-authd%{PROJ_DELIM}
-Slurm authentication module for Brent Chun's authd. Used to
-authenticate user originating an RPC
 %endif
 
 # This is named munge instead of auth-munge since there are 2 plugins in the
 # package.  auth-munge and crypto-munge
 %if %{slurm_with munge}
-%package -n %{pname}-munge%{PROJ_DELIM}
+%package munge
 Summary: Slurm authentication and crypto implementation using Munge
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM} munge%{PROJ_DELIM}
-BuildRequires: munge-devel%{PROJ_DELIM} munge-libs%{PROJ_DELIM}
+Group: System Environment/Base
+Requires: slurm munge
+BuildRequires: munge-devel munge-libs
 Obsoletes: slurm-auth-munge
-%description -n %{pname}-munge%{PROJ_DELIM}
+%description munge
 Slurm authentication and crypto implementation using Munge. Used to
 authenticate user originating an RPC, digitally sign and/or encrypt messages
 %endif
@@ -344,63 +283,69 @@ authenticate user originating an RPC, digitally sign and/or encrypt messages
 %if %{slurm_with bluegene}
 %package bluegene
 Summary: Slurm interfaces to IBM Blue Gene system
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM}
+Group: System Environment/Base
+Requires: slurm
 %description bluegene
 Slurm plugin interfaces to IBM Blue Gene system
 %endif
 
-%package -n %{pname}-slurmdbd%{PROJ_DELIM}
+%package slurmdbd
 Summary: Slurm database daemon
-Group: ohpc/rms
-Requires: %{pname}-plugins%{PROJ_DELIM} %{pname}-sql%{PROJ_DELIM}
-%description -n %{pname}-slurmdbd%{PROJ_DELIM}
+Group: System Environment/Base
+Requires: slurm-plugins slurm-sql
+%description slurmdbd
 Slurm database daemon. Used to accept and process database RPCs and upload
 database changes to slurmctld daemons on each cluster
 
-%package -n %{pname}-sql%{PROJ_DELIM}
+%package sql
 Summary: Slurm SQL support
-Group: ohpc/rms
-%description -n %{pname}-sql%{PROJ_DELIM}
+Group: System Environment/Base
+%description sql
 Slurm SQL support. Contains interfaces to MySQL.
 
-%package -n %{pname}-plugins%{PROJ_DELIM}
+%package plugins
 Summary: Slurm plugins (loadable shared objects)
-Group: ohpc/rms
-Requires: munge-libs%{PROJ_DELIM}
-%description -n %{pname}-plugins%{PROJ_DELIM}
+Group: System Environment/Base
+%description plugins
 Slurm plugins (loadable shared objects) supporting a wide variety of
 architectures and behaviors. These basically provide the building blocks
 with which Slurm can be configured. Note that some system specific plugins
 are in other packages
 
-%package -n %{pname}-torque%{PROJ_DELIM}
-Summary: Torque/PBS wrappers for transition from Torque/PBS to Slurm
-Group: ohpc/rms
-Requires: %{pname}-perlapi%{PROJ_DELIM}
-%description -n %{pname}-torque%{PROJ_DELIM}
+%package torque
+Summary: Torque/PBS wrappers for transitition from Torque/PBS to Slurm
+Group: Development/System
+Requires: slurm-perlapi
+%description torque
 Torque wrapper scripts used for helping migrate from Torque/PBS to Slurm
 
-%package -n %{pname}-sjobexit%{PROJ_DELIM}
+%package openlava
+Summary: openlava/LSF wrappers for transitition from OpenLava/LSF to Slurm
+Group: Development/System
+Requires: slurm-perlapi
+%description openlava
+OpenLava wrapper scripts used for helping migrate from OpenLava/LSF to Slurm
+
+%package sjobexit
 Summary: Slurm job exit code management tools
-Group: ohpc/rms
-Requires: %{pname}-perlapi%{PROJ_DELIM}
-%description -n %{pname}-sjobexit%{PROJ_DELIM}
+Group: Development/System
+Requires: slurm-perlapi
+%description sjobexit
 Slurm job exit code management tools. Enables users to alter job exit code
 information for completed jobs
 
-%package -n %{pname}-slurmdb-direct%{PROJ_DELIM}
+%package slurmdb-direct
 Summary: Wrappers to write directly to the slurmdb
-Group: ohpc/rms
-Requires: %{pname}-perlapi%{PROJ_DELIM}
-%description -n %{pname}-slurmdb-direct%{PROJ_DELIM}
+Group: Development/System
+Requires: slurm-perlapi
+%description slurmdb-direct
 Wrappers to write directly to the slurmdb
 
 %if %{slurm_with aix}
 %package aix
 Summary: Slurm interfaces to IBM AIX
-Group: ohpc/rms
-Requires: %{pname}{PROJ_DELIM}
+Group: System Environment/Base
+Requires: slurm
 BuildRequires: proctrack >= 3
 Obsoletes: slurm-aix-federation
 %description aix
@@ -410,8 +355,8 @@ Slurm interfaces for IBM AIX systems
 %if %{slurm_with percs}
 %package percs
 Summary: Slurm plugins to run on an IBM PERCS system
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM} nrt
+Group: System Environment/Base
+Requires: slurm nrt
 BuildRequires: nrt
 %description percs
 Slurm plugins to run on an IBM PERCS system, POE interface and NRT switch plugin
@@ -421,8 +366,8 @@ Slurm plugins to run on an IBM PERCS system, POE interface and NRT switch plugin
 %if %{slurm_with sgijob}
 %package proctrack-sgi-job
 Summary: Slurm process tracking plugin for SGI job containers
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM}
+Group: System Environment/Base
+Requires: slurm
 BuildRequires: job
 %description proctrack-sgi-job
 Slurm process tracking plugin for SGI job containers
@@ -430,35 +375,44 @@ Slurm process tracking plugin for SGI job containers
 %endif
 
 %if %{slurm_with lua}
-%package -n %{pname}-lua%{PROJ_DELIM}
+%package lua
 Summary: Slurm lua bindings
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM} lua
+Group: System Environment/Base
+Requires: slurm lua
 BuildRequires: lua-devel
-%description -n %{pname}-lua%{PROJ_DELIM}
+%description lua
 Slurm lua bindings
 Includes the Slurm proctrack/lua and job_submit/lua plugin
 %endif
 
-%package -n %{pname}-sjstat%{PROJ_DELIM}
+%package seff
+Summary: Mail tool that includes job statistics in user notification email
+Group: Development/System
+Requires: slurm
+%description seff
+Mail program used directly by the Slurm daemons. On completion of a job,
+wait for it's accounting information to be available and include that
+information in the email body.
+
+%package sjstat
 Summary: Perl tool to print Slurm job state information
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM}
-%description -n %{pname}-sjstat%{PROJ_DELIM}
+Group: Development/System
+Requires: slurm
+%description sjstat
 Perl tool to print Slurm job state information. The output is designed to give
 information on the resource usage and availablilty, as well as information
 about jobs that are currently active on the machine. This output is built
 using the Slurm utilities, sinfo, squeue and scontrol, the man pages for these
-utilites will provide more information and greater depth of understanding
+utilities will provide more information and greater depth of understanding
 
 %if %{slurm_with pam}
-%package -n %{pname}-pam_slurm%{PROJ_DELIM}
+%package pam_slurm
 Summary: PAM module for restricting access to compute nodes via Slurm
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM} %{pname}-devel%{PROJ_DELIM}
+Group: System Environment/Base
+Requires: slurm
 BuildRequires: pam-devel
 Obsoletes: pam_slurm
-%description -n %{pname}-pam_slurm%{PROJ_DELIM}
+%description pam_slurm
 This module restricts access to compute nodes in a cluster where Slurm is in
 use.  Access is granted to root, any user with an Slurm-launched job currently
 running on the node, or any user who has allocated resources on the node
@@ -466,55 +420,61 @@ according to the Slurm
 %endif
 
 %if %{slurm_with blcr}
-%package -n %{pname}-blcr%{PROJ_DELIM}
+%package blcr
 Summary: Allows Slurm to use Berkeley Lab Checkpoint/Restart
-Group: ohpc/rms
-Requires: %{pname}%{PROJ_DELIM}
-%description -n %{pname}-blcr%{PROJ_DELIM}
+Group: System Environment/Base
+Requires: slurm
+%description blcr
 Gives the ability for Slurm to use Berkeley Lab Checkpoint/Restart
 %endif
 
 #############################################################################
 
 %prep
-#%%setup -n slurm-slurm-%{ver_exp}
-%setup -n slurm-master
-
-# OpenHPC patches
-### patch1
-### patch2
-### patch3
-### patch4
+%setup -n %{name}-%{version}-%{release}
 
 %build
 %configure \
-	%{?slurm_with_debug:--enable-debug} \
+	%{!?slurm_with_debug:--disable-debug} \
 	%{?slurm_with_partial_attach:--enable-partial-attach} \
-	%{?slurm_with_sun_const:--enable-sun-const} \
 	%{?with_db2_dir:--with-db2-dir=%{?with_db2_dir}} \
 	%{?with_pam_dir:--with-pam_dir=%{?with_pam_dir}} \
 	%{?with_proctrack:--with-proctrack=%{?with_proctrack}}\
 	%{?with_cpusetdir:--with-cpusetdir=%{?with_cpusetdir}} \
 	%{?with_apbasildir:--with-apbasildir=%{?with_apbasildir}} \
-	%{?with_xcpu:--with-xcpu=%{?with_xcpu}} \
 	%{?with_mysql_config:--with-mysql_config=%{?with_mysql_config}} \
 	%{?with_pg_config:--with-pg_config=%{?with_pg_config}} \
 	%{?with_ssl:--with-ssl=%{?with_ssl}} \
 	%{?with_munge:--with-munge=%{?with_munge}}\
+	%{?with_netloc:--with-netloc=%{?with_netloc}}\
 	%{?with_blcr:--with-blcr=%{?with_blcr}}\
 	%{?slurm_with_cray:--enable-native-cray}\
 	%{?slurm_with_cray_network:--enable-cray-network}\
 	%{?slurm_with_salloc_background:--enable-salloc-background} \
 	%{!?slurm_with_readline:--without-readline} \
 	%{?slurm_with_multiple_slurmd:--enable-multiple-slurmd} \
+	%{?slurm_with_pmix:--with-pmix=%{?with_pmix_dir}} \
+	%{?with_freeipmi:--with-freeipmi=%{?with_freeipmi}}\
 	%{?with_cflags}
 
-make %{?_smp_mflags}
+%__make %{?_smp_mflags}
 
 %install
+
+
+# Strip out some dependencies
+
+cat > find-requires.sh <<'EOF'
+exec %{__find_requires} "$@" | egrep -v '^libpmix.so|libevent'
+EOF
+chmod +x find-requires.sh
+%global _use_internal_dependency_generator 0
+%global __find_requires %{_builddir}/%{buildsubdir}/find-requires.sh
+
+
 rm -rf "$RPM_BUILD_ROOT"
-DESTDIR="$RPM_BUILD_ROOT" make install
-DESTDIR="$RPM_BUILD_ROOT" make install-contrib
+DESTDIR="$RPM_BUILD_ROOT" %__make install
+DESTDIR="$RPM_BUILD_ROOT" %__make install-contrib
 
 %ifos aix5.3
    mv ${RPM_BUILD_ROOT}%{_bindir}/srun ${RPM_BUILD_ROOT}%{_sbindir}
@@ -533,63 +493,39 @@ DESTDIR="$RPM_BUILD_ROOT" make install-contrib
    fi
 %endif
 
-# 6/16/15 karl.w.schulz@intel.com - do not package Slurm's version of libpmi with OpenHPC.
-%if 0%{?OHPC_BUILD2}
-   rm -f $RPM_BUILD_ROOT/%{_libdir}/libpmi*
-   rm -f $RPM_BUILD_ROOT/%{_libdir}/mpi_pmi2*
-%endif
-
-# Do not package Slurm's version of libpmi on Cray systems with ALPS.
+# Do not package Slurm's version of libpmi on Cray systems.
 # Cray's version of libpmi should be used.
 %if %{slurm_with cray} || %{slurm_with cray_alps}
-   %if %{slurm_with cray_alps}
-      rm -f $RPM_BUILD_ROOT/%{_libdir}/libpmi*
-   %else
+   rm -f $RPM_BUILD_ROOT/%{_libdir}/libpmi*
+   %if %{slurm_with cray}
+      install -D -m644 contribs/cray/plugstack.conf.template ${RPM_BUILD_ROOT}%{_sysconfdir}/plugstack.conf.template
       install -D -m644 contribs/cray/slurm.conf.template ${RPM_BUILD_ROOT}%{_sysconfdir}/slurm.conf.template
    %endif
    install -D -m644 contribs/cray/opt_modulefiles_slurm $RPM_BUILD_ROOT/opt/modulefiles/slurm/%{version}-%{release}
    echo -e '#%Module\nset ModulesVersion "%{version}-%{release}"' > $RPM_BUILD_ROOT/opt/modulefiles/slurm/.version
 %else
    rm -f contribs/cray/opt_modulefiles_slurm
+   rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/plugstack.conf.template
    rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf.template
+   rm -f $RPM_BUILD_ROOT/%{_sbindir}/capmc_suspend
+   rm -f $RPM_BUILD_ROOT/%{_sbindir}/capmc_resume
    rm -f $RPM_BUILD_ROOT/%{_sbindir}/slurmconfgen.py
 %endif
 
-install -D -m644 etc/slurm.conf.example ${RPM_BUILD_ROOT}%{_sysconfdir}/slurm.conf.example
 install -D -m644 etc/cgroup.conf.example ${RPM_BUILD_ROOT}%{_sysconfdir}/cgroup.conf.example
 install -D -m644 etc/cgroup_allowed_devices_file.conf.example ${RPM_BUILD_ROOT}%{_sysconfdir}/cgroup_allowed_devices_file.conf.example
 install -D -m755 etc/cgroup.release_common.example ${RPM_BUILD_ROOT}%{_sysconfdir}/cgroup.release_common.example
 install -D -m755 etc/cgroup.release_common.example ${RPM_BUILD_ROOT}%{_sysconfdir}/cgroup/release_freezer
 install -D -m755 etc/cgroup.release_common.example ${RPM_BUILD_ROOT}%{_sysconfdir}/cgroup/release_cpuset
 install -D -m755 etc/cgroup.release_common.example ${RPM_BUILD_ROOT}%{_sysconfdir}/cgroup/release_memory
-install -D -m644 etc/slurmdbd.conf.example ${RPM_BUILD_ROOT}%{_sysconfdir}/slurmdbd.conf.example
+install -D -m644 etc/layouts.d.power.conf.example ${RPM_BUILD_ROOT}%{_sysconfdir}/layouts.d/power.conf.example
+install -D -m644 etc/layouts.d.power_cpufreq.conf.example ${RPM_BUILD_ROOT}%{_sysconfdir}/layouts.d/power_cpufreq.conf.example
+install -D -m644 etc/layouts.d.unit.conf.example ${RPM_BUILD_ROOT}%{_sysconfdir}/layouts.d/unit.conf.example
+install -D -m644 etc/slurm.conf.example ${RPM_BUILD_ROOT}%{_sysconfdir}/slurm.conf.example
 install -D -m755 etc/slurm.epilog.clean ${RPM_BUILD_ROOT}%{_sysconfdir}/slurm.epilog.clean
+install -D -m644 etc/slurmdbd.conf.example ${RPM_BUILD_ROOT}%{_sysconfdir}/slurmdbd.conf.example
 install -D -m755 contribs/sgather/sgather ${RPM_BUILD_ROOT}%{_bindir}/sgather
 install -D -m755 contribs/sjstat ${RPM_BUILD_ROOT}%{_bindir}/sjstat
-
-# 9/8/14 karl.w.schulz@intel.com - provide starting config file
-%if 0%{?OHPC_BUILD}
-head -n -2 $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf.example > $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf
-echo "# OpenHPC default configuration" >> $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf
-echo "PropagateResourceLimitsExcept=MEMLOCK" >> $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf
-echo "SlurmdLogFile=/var/log/slurm.log" >> $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf
-echo "SlurmctldLogFile=/var/log/slurmctld.log" >> $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf
-echo "Epilog=/etc/slurm/slurm.epilog.clean" >> $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf
-echo "NodeName=c[1-4] Sockets=2 CoresPerSocket=8 ThreadsPerCore=2 State=UNKNOWN" >> $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf
-echo "PartitionName=normal Nodes=c[1-4] Default=YES MaxTime=24:00:00 State=UP" >> $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.conf
-
-# 9/17/14 karl.w.schulz@intel.com - Add option to drop VM cache during epilog
-sed -i '/^# No other SLURM jobs,/i \\n# Drop clean caches (OpenHPC)\necho 3 > /proc/sys/vm/drop_caches\n\n#' $RPM_BUILD_ROOT/%{_sysconfdir}/slurm.epilog.clean
-
-%endif
-
-# Correct some file permissions
-test -f $RPM_BUILD_ROOT/%{_libdir}/libpmi.la	&&
-	chmod 644 $RPM_BUILD_ROOT/%{_libdir}/libpmi.la
-test -f $RPM_BUILD_ROOT/%{_libdir}/libslurm.la	&&
-	chmod 644 $RPM_BUILD_ROOT/%{_libdir}/libslurm.la
-test -f $RPM_BUILD_ROOT/%{_libdir}/libslurmdb.la &&
-	chmod 644 $RPM_BUILD_ROOT/%{_libdir}/libslurmdb.la
 
 # Delete unpackaged files:
 test -s $RPM_BUILD_ROOT/%{_perldir}/auto/Slurm/Slurm.bs         ||
@@ -598,10 +534,8 @@ rm   -f $RPM_BUILD_ROOT/%{_perldir}/auto/Slurm/Slurm.bs
 test -s $RPM_BUILD_ROOT/%{_perldir}/auto/Slurmdb/Slurmdb.bs     ||
 rm   -f $RPM_BUILD_ROOT/%{_perldir}/auto/Slurmdb/Slurmdb.bs
 
-rm -f $RPM_BUILD_ROOT/%{_libdir}/libpmi.a
-rm -f $RPM_BUILD_ROOT/%{_libdir}/libpmi2.a
-rm -f $RPM_BUILD_ROOT/%{_libdir}/libslurm.a
-rm -f $RPM_BUILD_ROOT/%{_libdir}/libslurmdb.a
+rm -f $RPM_BUILD_ROOT/%{_libdir}/*.a
+rm -f $RPM_BUILD_ROOT/%{_libdir}/*.la
 rm -f $RPM_BUILD_ROOT/%{_libdir}/slurm/*.a
 rm -f $RPM_BUILD_ROOT/%{_libdir}/slurm/*.la
 rm -f $RPM_BUILD_ROOT/%{_libdir}/slurm/job_submit_defaults.so
@@ -612,6 +546,8 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/security/*.la
 %if %{?with_pam_dir}0
 rm -f $RPM_BUILD_ROOT/%{with_pam_dir}/pam_slurm.a
 rm -f $RPM_BUILD_ROOT/%{with_pam_dir}/pam_slurm.la
+rm -f $RPM_BUILD_ROOT/%{with_pam_dir}/pam_slurm_adopt.a
+rm -f $RPM_BUILD_ROOT/%{with_pam_dir}/pam_slurm_adopt.la
 %endif
 rm -f $RPM_BUILD_ROOT/lib/security/pam_slurm.a
 rm -f $RPM_BUILD_ROOT/lib/security/pam_slurm.la
@@ -619,6 +555,12 @@ rm -f $RPM_BUILD_ROOT/lib32/security/pam_slurm.a
 rm -f $RPM_BUILD_ROOT/lib32/security/pam_slurm.la
 rm -f $RPM_BUILD_ROOT/lib64/security/pam_slurm.a
 rm -f $RPM_BUILD_ROOT/lib64/security/pam_slurm.la
+rm -f $RPM_BUILD_ROOT/lib/security/pam_slurm_adopt.a
+rm -f $RPM_BUILD_ROOT/lib/security/pam_slurm_adopt.la
+rm -f $RPM_BUILD_ROOT/lib32/security/pam_slurm_adopt.a
+rm -f $RPM_BUILD_ROOT/lib32/security/pam_slurm_adopt.la
+rm -f $RPM_BUILD_ROOT/lib64/security/pam_slurm_adopt.a
+rm -f $RPM_BUILD_ROOT/lib64/security/pam_slurm_adopt.la
 %if ! %{slurm_with auth_none}
 rm -f $RPM_BUILD_ROOT/%{_libdir}/slurm/auth_none.so
 %endif
@@ -675,12 +617,18 @@ LIST=./slurm.files
 touch $LIST
 test -f $RPM_BUILD_ROOT/etc/init.d/slurm			&&
   echo /etc/init.d/slurm				>> $LIST
+test -f $RPM_BUILD_ROOT/%{_sbindir}/capmc_suspend		&&
+  echo %{_sbindir}/capmc_suspend			>> $LIST
+test -f $RPM_BUILD_ROOT/%{_sbindir}/capmc_resume		&&
+  echo %{_sbindir}/capmc_resume				>> $LIST
 test -f $RPM_BUILD_ROOT/usr/sbin/rcslurm			&&
   echo /usr/sbin/rcslurm				>> $LIST
-test -f $RPM_BUILD_ROOT/lib/systemd/system/slurmctld.service	&&
-  echo /lib/systemd/system/slurmctld.service		>> $LIST
-test -f $RPM_BUILD_ROOT/lib/systemd/system/slurmd.service	&&
-  echo /lib/systemd/system/slurmd.service		>> $LIST
+test -f $RPM_BUILD_ROOT/usr/lib/systemd/system/slurmctld.service	&&
+  echo /usr/lib/systemd/system/slurmctld.service		>> $LIST
+test -f $RPM_BUILD_ROOT/usr/lib/systemd/system/slurmd.service	&&
+  echo /usr/lib/systemd/system/slurmd.service		>> $LIST
+test -f $RPM_BUILD_ROOT/%{_bindir}/netloc_to_topology		&&
+  echo %{_bindir}/netloc_to_topology			>> $LIST
 
 test -f $RPM_BUILD_ROOT/opt/modulefiles/slurm/%{version}-%{release} &&
   echo /opt/modulefiles/slurm/%{version}-%{release} >> $LIST
@@ -702,7 +650,7 @@ libdir=%{_libdir}
 Cflags: -I\${includedir}
 Libs: -L\${libdir} -lslurm
 Description: Slurm API
-Name: %{pname}
+Name: %{name}
 Version: %{version}
 EOF
 
@@ -727,13 +675,6 @@ touch $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/proctrack_aix.so      &&
   echo %{_libdir}/slurm/proctrack_aix.so               >> $LIST
 
-LIST=./devel.files
-touch $LIST
-test -f $RPM_BUILD_ROOT/%{_libdir}/libpmi.la			&&
-  echo %{_libdir}/libpmi.la				>> $LIST
-test -f $RPM_BUILD_ROOT/%{_libdir}/libpmi2.la			&&
-  echo %{_libdir}/libpmi2.la				>> $LIST
-
 LIST=./percs.files
 touch $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/checkpoint_poe.so	&&
@@ -752,8 +693,8 @@ test -f $RPM_BUILD_ROOT/etc/init.d/slurmdbd			&&
   echo /etc/init.d/slurmdbd				>> $LIST
 test -f $RPM_BUILD_ROOT/usr/sbin/rcslurmdbd			&&
   echo /usr/sbin/rcslurmdbd				>> $LIST
-test -f $RPM_BUILD_ROOT/lib/systemd/system/slurmdbd.service	&&
-  echo /lib/systemd/system/slurmdbd.service		>> $LIST
+test -f $RPM_BUILD_ROOT/usr/lib/systemd/system/slurmdbd.service	&&
+  echo /usr/lib/systemd/system/slurmdbd.service		>> $LIST
 
 LIST=./sql.files
 touch $LIST
@@ -762,15 +703,12 @@ test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/accounting_storage_mysql.so &&
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/jobcomp_mysql.so            &&
    echo %{_libdir}/slurm/jobcomp_mysql.so            >> $LIST
 
-LIST=./perlapi.files
-touch $LIST
-test -f $RPM_BUILD_ROOT/%{_perldir}/auto/Slurm/Slurm.bs        &&
-   echo $RPM_BUILD_ROOT/%{_perldir}/auto/Slurm/Slurm.bs        >> $LIST
-test -f $RPM_BUILD_ROOT/%{_perldir}/auto/Slurmdb/Slurmdb.bs    &&
-   echo $RPM_BUILD_ROOT/%{_perldir}/auto/Slurmdb/Slurmdb.bs    >> $LIST
-
 LIST=./plugins.files
 touch $LIST
+test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/acct_gather_energy_cray.so  &&
+   echo %{_libdir}/slurm/acct_gather_energy_cray.so  >> $LIST
+test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/acct_gather_energy_ibmaem.so &&
+   echo %{_libdir}/slurm/acct_gather_energy_ibmaem.so  >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/acct_gather_energy_ipmi.so  &&
    echo %{_libdir}/slurm/acct_gather_energy_ipmi.so  >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/acct_gather_energy_rapl.so  &&
@@ -779,18 +717,26 @@ test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/acct_gather_infiniband_ofed.so &&
    echo %{_libdir}/slurm/acct_gather_infiniband_ofed.so >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/acct_gather_profile_hdf5.so &&
    echo %{_libdir}/slurm/acct_gather_profile_hdf5.so >> $LIST
+test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/burst_buffer_cray.so        &&
+   echo %{_libdir}/slurm/burst_buffer_cray.so        >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/crypto_openssl.so           &&
    echo %{_libdir}/slurm/crypto_openssl.so           >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/ext_sensors_rrd.so          &&
    echo %{_libdir}/slurm/ext_sensors_rrd.so          >> $LIST
+test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/jobcomp_elasticsearch.so    &&
+   echo %{_libdir}/slurm/jobcomp_elasticsearch.so    >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/launch_slurm.so             &&
    echo %{_libdir}/slurm/launch_slurm.so             >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/launch_aprun.so             &&
    echo %{_libdir}/slurm/launch_aprun.so             >> $LIST
+test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/mpi_mvapich.so              &&
+   echo %{_libdir}/slurm/mpi_mvapich.so              >> $LIST
+test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/node_features_knl_cray.so   &&
+   echo %{_libdir}/slurm/node_features_knl_cray.so   >> $LIST
+test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/power_cray.so               &&
+   echo %{_libdir}/slurm/power_cray.so               >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/select_bluegene.so          &&
    echo %{_libdir}/slurm/select_bluegene.so          >> $LIST
-test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/slurmctld_dynalloc.so       &&
-   echo %{_libdir}/slurm/slurmctld_dynalloc.so       >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/task_affinity.so            &&
    echo %{_libdir}/slurm/task_affinity.so            >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/task_cgroup.so              &&
@@ -801,6 +747,8 @@ test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/job_container_none.so       &&
    echo %{_libdir}/slurm/job_container_none.so       >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/task_cray.so                &&
    echo %{_libdir}/slurm/task_cray.so                >> $LIST
+test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/slurmctld_nonstop.so        &&
+   echo %{_libdir}/slurm/slurmctld_nonstop.so        >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/switch_cray.so              &&
    echo %{_libdir}/slurm/switch_cray.so              >> $LIST
 test -f $RPM_BUILD_ROOT/%{_libdir}/slurm/proctrack_cray.so           &&
@@ -811,16 +759,22 @@ touch $LIST
 %if %{?with_pam_dir}0
     test -f $RPM_BUILD_ROOT/%{with_pam_dir}/pam_slurm.so	&&
 	echo %{with_pam_dir}/pam_slurm.so	>>$LIST
+    test -f $RPM_BUILD_ROOT/%{with_pam_dir}/pam_slurm_adopt.so	&&
+	echo %{with_pam_dir}/pam_slurm_adopt.so	>>$LIST
 %else
-    test -f $RPM_BUILD_ROOT/lib/security/pam_slurm.so		&&
+    test -f $RPM_BUILD_ROOT/lib/security/pam_slurm.so	&&
 	echo /lib/security/pam_slurm.so		>>$LIST
-    test -f $RPM_BUILD_ROOT/lib32/security/pam_slurm.so		&&
+    test -f $RPM_BUILD_ROOT/lib32/security/pam_slurm.so	&&
 	echo /lib32/security/pam_slurm.so	>>$LIST
-    test -f $RPM_BUILD_ROOT/lib64/security/pam_slurm.so		&&
+    test -f $RPM_BUILD_ROOT/lib64/security/pam_slurm.so	&&
 	echo /lib64/security/pam_slurm.so	>>$LIST
+    test -f $RPM_BUILD_ROOT/lib/security/pam_slurm_adopt.so		&&
+	echo /lib/security/pam_slurm_adopt.so		>>$LIST
+    test -f $RPM_BUILD_ROOT/lib32/security/pam_slurm_adopt.so		&&
+	echo /lib32/security/pam_slurm_adopt.so		>>$LIST
+    test -f $RPM_BUILD_ROOT/lib64/security/pam_slurm_adopt.so		&&
+	echo /lib64/security/pam_slurm_adopt.so		>>$LIST
 %endif
-
-mkdir -p $RPM_BUILD_ROOT/%{_docdir}
 #############################################################################
 
 %clean
@@ -831,8 +785,10 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,0755)
 %{_datadir}/doc
 %{_bindir}/s*
+%exclude %{_bindir}/seff
 %exclude %{_bindir}/sjobexitmod
 %exclude %{_bindir}/sjstat
+%exclude %{_bindir}/smail
 %{_sbindir}/slurmctld
 %{_sbindir}/slurmd
 %{_sbindir}/slurmstepd
@@ -843,10 +799,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/src/*
 %{_mandir}/man1/*
 %{_mandir}/man5/acct_gather.*
-%{_mandir}/man5/ext_sensors.*
+%{_mandir}/man5/burst_buffer.*
 %{_mandir}/man5/cgroup.*
 %{_mandir}/man5/cray.*
+%{_mandir}/man5/ext_sensors.*
 %{_mandir}/man5/gres.*
+%{_mandir}/man5/knl.*
 %{_mandir}/man5/nonstop.*
 %{_mandir}/man5/slurm.*
 %{_mandir}/man5/topology.*
@@ -863,35 +821,20 @@ rm -rf $RPM_BUILD_ROOT
 %dir /opt/modulefiles/slurm
 %endif
 %if %{slurm_with cray}
+%config %{_sysconfdir}/plugstack.conf.template
 %config %{_sysconfdir}/slurm.conf.template
 %{_sbindir}/slurmconfgen.py
 %endif
-%config %{_sysconfdir}/slurm.conf.example
-
-%{OHPC_PUB}
-%doc AUTHORS BUILD.NOTES COPYING DISCLAIMER INSTALL LICENSE.OpenSSL NEWS README.rst RELEASE_NOTES
-
-# 9/8/14 karl.w.schulz@intel.com - provide starting config file
-%if 0%{?OHPC_BUILD}
-%config %{_sysconfdir}/slurm.conf
-%endif
-
-# 11/13/14 karl.w.schulz@intel.com - include systemd files 
-
-%if 0%{?suse_version} >= 1200 || 0%{?rhel_version} >= 700 || 0%{?centos_version} >= 700
-
-%config /usr/lib/systemd/system/slurmctld.service
-%config /usr/lib/systemd/system/slurmd.service
-%config /usr/lib/systemd/system/slurmdbd.service
-
-%endif
-
 %config %{_sysconfdir}/cgroup.conf.example
 %config %{_sysconfdir}/cgroup_allowed_devices_file.conf.example
 %config %{_sysconfdir}/cgroup.release_common.example
 %config %{_sysconfdir}/cgroup/release_freezer
 %config %{_sysconfdir}/cgroup/release_cpuset
 %config %{_sysconfdir}/cgroup/release_memory
+%config %{_sysconfdir}/layouts.d/power.conf.example
+%config %{_sysconfdir}/layouts.d/power_cpufreq.conf.example
+%config %{_sysconfdir}/layouts.d/unit.conf.example
+%config %{_sysconfdir}/slurm.conf.example
 %config %{_sysconfdir}/slurm.epilog.clean
 %exclude %{_mandir}/man1/sjobexit*
 %exclude %{_mandir}/man1/sjstat*
@@ -901,13 +844,11 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 #############################################################################
 
-%files -f devel.files -n %{pname}-devel%{PROJ_DELIM}
+%files devel
 %defattr(-,root,root)
 %dir %attr(0755,root,root)
 %dir %{_prefix}/include/slurm
 %{_prefix}/include/slurm/*
-%{_libdir}/libslurm.la
-%{_libdir}/libslurmdb.la
 %{_mandir}/man3/slurm_*
 %dir %{_libdir}/pkgconfig
 %{_libdir}/pkgconfig/slurm.pc
@@ -915,24 +856,17 @@ rm -rf $RPM_BUILD_ROOT
 #############################################################################
 
 %if %{slurm_with auth_none}
-%files -n %{pname}-auth-none%{PROJ_DELIM}
+%files auth-none
 %defattr(-,root,root)
 %{_libdir}/slurm/auth_none.so
 %endif
 #############################################################################
 
 %if %{slurm_with munge}
-%files -n %{pname}-munge%{PROJ_DELIM}
+%files munge
 %defattr(-,root,root)
 %{_libdir}/slurm/auth_munge.so
 %{_libdir}/slurm/crypto_munge.so
-%endif
-#############################################################################
-
-%if %{slurm_with authd}
-%defattr(-,root,root)
-%files -n %{pname}-auth-authd%{PROJ_DELIM}
-%{_libdir}/slurm/auth_authd.so
 %endif
 #############################################################################
 
@@ -948,7 +882,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 #############################################################################
 
-%files -f perlapi.files -n %{pname}-perlapi%PROJ_DELIM
+%files perlapi
 %defattr(-,root,root)
 %{_perldir}/Slurm.pm
 %{_perldir}/Slurm/Bitstr.pm
@@ -963,7 +897,7 @@ rm -rf $RPM_BUILD_ROOT
 
 #############################################################################
 
-%files -f slurmdbd.files -n %{pname}-slurmdbd%{PROJ_DELIM}
+%files -f slurmdbd.files slurmdbd
 %defattr(-,root,root)
 %{_sbindir}/slurmdbd
 %{_mandir}/man5/slurmdbd.*
@@ -971,12 +905,12 @@ rm -rf $RPM_BUILD_ROOT
 %config %{_sysconfdir}/slurmdbd.conf.example
 #############################################################################
 
-%files -f sql.files -n %{pname}-sql%{PROJ_DELIM}
+%files -f sql.files sql
 %defattr(-,root,root)
 %dir %{_libdir}/slurm
 #############################################################################
 
-%files -f plugins.files -n %{pname}-plugins%{PROJ_DELIM}
+%files -f plugins.files plugins
 %defattr(-,root,root)
 %dir %{_libdir}/slurm
 %{_libdir}/slurm/accounting_storage_filetxt.so
@@ -987,6 +921,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/acct_gather_infiniband_none.so
 %{_libdir}/slurm/acct_gather_energy_none.so
 %{_libdir}/slurm/acct_gather_profile_none.so
+%{_libdir}/slurm/burst_buffer_generic.so
 %{_libdir}/slurm/checkpoint_none.so
 %{_libdir}/slurm/checkpoint_ompi.so
 %{_libdir}/slurm/core_spec_cray.so
@@ -1006,19 +941,26 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/jobcomp_filetxt.so
 %{_libdir}/slurm/jobcomp_none.so
 %{_libdir}/slurm/jobcomp_script.so
+%{_libdir}/slurm/layouts_power_cpufreq.so
+%{_libdir}/slurm/layouts_power_default.so
+%{_libdir}/slurm/layouts_unit_default.so
+%{_libdir}/slurm/mcs_group.so
+%{_libdir}/slurm/mcs_none.so
+%{_libdir}/slurm/mcs_user.so
 %if ! %{slurm_with bluegene}
 %{_libdir}/slurm/mpi_lam.so
 %{_libdir}/slurm/mpi_mpich1_p4.so
 %{_libdir}/slurm/mpi_mpich1_shmem.so
 %{_libdir}/slurm/mpi_mpichgm.so
 %{_libdir}/slurm/mpi_mpichmx.so
-%{_libdir}/slurm/mpi_mvapich.so
 %{_libdir}/slurm/mpi_openmpi.so
-%if ! 0%{?OHPC_BUILD}
 %{_libdir}/slurm/mpi_pmi2.so
 %endif
-%endif
 %{_libdir}/slurm/mpi_none.so
+%if %{slurm_with pmix}
+%{_libdir}/slurm/mpi_pmix.so
+%endif
+%{_libdir}/slurm/power_none.so
 %{_libdir}/slurm/preempt_job_prio.so
 %{_libdir}/slurm/preempt_none.so
 %{_libdir}/slurm/preempt_partition_prio.so
@@ -1040,17 +982,17 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/select_cons_res.so
 %{_libdir}/slurm/select_linear.so
 %{_libdir}/slurm/select_serial.so
-%{_libdir}/slurm/slurmctld_nonstop.so
 %{_libdir}/slurm/switch_generic.so
 %{_libdir}/slurm/switch_none.so
 %{_libdir}/slurm/task_none.so
 %{_libdir}/slurm/topology_3d_torus.so
+%{_libdir}/slurm/topology_hypercube.so
 %{_libdir}/slurm/topology_node_rank.so
 %{_libdir}/slurm/topology_none.so
 %{_libdir}/slurm/topology_tree.so
 #############################################################################
 
-%files -n %{pname}-torque%{PROJ_DELIM}
+%files torque
 %defattr(-,root,root)
 %{_bindir}/pbsnodes
 %{_bindir}/qalter
@@ -1066,13 +1008,22 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/spank_pbs.so
 #############################################################################
 
-%files -n %{pname}-sjobexit%{PROJ_DELIM}
+%files openlava
+%defattr(-,root,root)
+%{_bindir}/bjobs
+%{_bindir}/bkill
+%{_bindir}/bsub
+%{_bindir}/lsid
+
+#############################################################################
+
+%files sjobexit
 %defattr(-,root,root)
 %{_bindir}/sjobexitmod
 %{_mandir}/man1/sjobexit*
 #############################################################################
 
-%files -n %{pname}-slurmdb-direct%{PROJ_DELIM}
+%files slurmdb-direct
 %defattr(-,root,root)
 %config (noreplace) %{_perldir}/config.slurmdb.pl
 %{_sbindir}/moab_2_slurmdb
@@ -1099,7 +1050,7 @@ rm -rf $RPM_BUILD_ROOT
 #############################################################################
 
 %if %{slurm_with lua}
-%files -n %{pname}-lua%{PROJ_DELIM}
+%files lua
 %defattr(-,root,root)
 %doc contribs/lua/proctrack.lua
 %{_libdir}/slurm/job_submit_lua.so
@@ -1107,20 +1058,26 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 #############################################################################
 
-%files -n %{pname}-sjstat%{PROJ_DELIM}
+%files seff
+%defattr(-,root,root)
+%{_bindir}/seff
+%{_bindir}/smail
+#############################################################################
+
+%files sjstat
 %defattr(-,root,root)
 %{_bindir}/sjstat
 %{_mandir}/man1/sjstat*
 #############################################################################
 
 %if %{slurm_with pam}
-%files -f pam.files -n %{pname}-pam_slurm%{PROJ_DELIM}
+%files -f pam.files pam_slurm
 %defattr(-,root,root)
 %endif
 #############################################################################
 
 %if %{slurm_with blcr}
-%files -n %{pname}-blcr%{PROJ_DELIM}
+%files blcr
 %defattr(-,root,root)
 %{_bindir}/srun_cr
 %{_libexecdir}/slurm/cr_*
@@ -1142,18 +1099,11 @@ rm -rf $RPM_BUILD_ROOT
 #fi
 
 %post
-# 8/15/14 karl.w.schulz@intel.com - use insserv macro for init.d on suse
-
-%if 0%{?suse_version}
-%{fillup_and_insserv -f}
-%else
-if [ $1 = 1 ]; then
-   [ -x /sbin/chkconfig ] && /sbin/chkconfig --add slurm
-fi
-%endif
-
 if [ -x /sbin/ldconfig ]; then
     /sbin/ldconfig %{_libdir}
+    if [ $1 = 1 ]; then
+	[ -x /sbin/chkconfig ] && /sbin/chkconfig --add slurm
+    fi
 fi
 
 %if %{slurm_with bluegene}
@@ -1164,7 +1114,7 @@ fi
 %endif
 
 %preun
-if [ "$1" = 0 ]; then
+if [ "$1" -eq 0 ]; then
     if [ -x /etc/init.d/slurm ]; then
 	[ -x /sbin/chkconfig ] && /sbin/chkconfig --del slurm
 	if /etc/init.d/slurm status | grep -q running; then
@@ -1173,8 +1123,8 @@ if [ "$1" = 0 ]; then
     fi
 fi
 
-%preun -n %{pname}-slurmdbd%{PROJ_DELIM}
-if [ "$1" = 0 ]; then
+%preun slurmdbd
+if [ "$1" -eq 0 ]; then
     if [ -x /etc/init.d/slurmdbd ]; then
 	[ -x /sbin/chkconfig ] && /sbin/chkconfig --del slurmdbd
 	if /etc/init.d/slurmdbd status | grep -q running; then
@@ -1184,7 +1134,9 @@ if [ "$1" = 0 ]; then
 fi
 
 %postun
-if [ "$1" = 0 ]; then
+if [ "$1" -gt 1 ]; then
+    /etc/init.d/slurm condrestart
+elif [ "$1" -eq 0 ]; then
     if [ -x /sbin/ldconfig ]; then
 	/sbin/ldconfig %{_libdir}
     fi
@@ -1192,6 +1144,11 @@ fi
 %if %{?insserv_cleanup:1}0
 %insserv_cleanup
 %endif
+
+%postun slurmdbd
+if [ "$1" -gt 1 ]; then
+    /etc/init.d/slurmdbd condrestart
+fi
 
 #############################################################################
 
