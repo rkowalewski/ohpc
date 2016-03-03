@@ -1072,10 +1072,10 @@ rm -rf $RPM_BUILD_ROOT
 ### %{_mandir}/man1/sjobexit*
 #############################################################################
 
-%files -n %{pname}-slurmdb-direct%{PROJ_DELIM}
-%defattr(-,root,root)
-%config (noreplace) %{_perldir}/config.slurmdb.pl
-%{_sbindir}/moab_2_slurmdb
+### %files -n %{pname}-slurmdb-direct%{PROJ_DELIM}
+### %defattr(-,root,root)
+### %config (noreplace) %{_perldir}/config.slurmdb.pl
+### %{_sbindir}/moab_2_slurmdb
 #############################################################################
 
 %if %{slurm_with aix}
