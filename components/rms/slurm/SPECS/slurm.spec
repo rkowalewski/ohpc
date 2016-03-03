@@ -1066,10 +1066,10 @@ rm -rf $RPM_BUILD_ROOT
 ### %{_libdir}/slurm/spank_pbs.so
 #############################################################################
 
-%files -n %{pname}-sjobexit%{PROJ_DELIM}
-%defattr(-,root,root)
-%{_bindir}/sjobexitmod
-%{_mandir}/man1/sjobexit*
+### %files -n %{pname}-sjobexit%{PROJ_DELIM}
+### %defattr(-,root,root)
+### %{_bindir}/sjobexitmod
+### %{_mandir}/man1/sjobexit*
 #############################################################################
 
 %files -n %{pname}-slurmdb-direct%{PROJ_DELIM}
