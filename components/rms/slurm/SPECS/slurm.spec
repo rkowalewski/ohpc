@@ -506,6 +506,7 @@ Gives the ability for Slurm to use Berkeley Lab Checkpoint/Restart
 	%{?slurm_with_cray_network:--enable-cray-network}\
 	%{?slurm_with_salloc_background:--enable-salloc-background} \
 	%{!?slurm_with_readline:--without-readline} \
+	%{?slurm_with_pmix:--with-pmix=%{?with_pmix_dir}} \
 	%{?slurm_with_multiple_slurmd:--enable-multiple-slurmd} \
 	%{?with_cflags}
 
@@ -1022,6 +1023,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %endif
 %{_libdir}/slurm/mpi_none.so
+%if %{slurm_with pmix}
+%{_libdir}/slurm/mpi_pmix.so
+%endif
 %{_libdir}/slurm/preempt_job_prio.so
 %{_libdir}/slurm/preempt_none.so
 %{_libdir}/slurm/preempt_partition_prio.so
