@@ -948,18 +948,18 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 #############################################################################
 
-%files -f perlapi.files -n %{pname}-perlapi%PROJ_DELIM
-%defattr(-,root,root)
-%{_perldir}/Slurm.pm
-%{_perldir}/Slurm/Bitstr.pm
-%{_perldir}/Slurm/Constant.pm
-%{_perldir}/Slurm/Hostlist.pm
-%{_perldir}/Slurm/Stepctx.pm
-%{_perldir}/auto/Slurm/Slurm.so
-%{_perldir}/Slurmdb.pm
-%{_perldir}/auto/Slurmdb/Slurmdb.so
-%{_perldir}/auto/Slurmdb/autosplit.ix
-%{_perlman3dir}/Slurm*
+#### %files -f perlapi.files -n %{pname}-perlapi%PROJ_DELIM
+#### %defattr(-,root,root)
+#### %{_perldir}/Slurm.pm
+#### %{_perldir}/Slurm/Bitstr.pm
+#### %{_perldir}/Slurm/Constant.pm
+#### %{_perldir}/Slurm/Hostlist.pm
+#### %{_perldir}/Slurm/Stepctx.pm
+#### %{_perldir}/auto/Slurm/Slurm.so
+#### %{_perldir}/Slurmdb.pm
+#### %{_perldir}/auto/Slurmdb/Slurmdb.so
+#### %{_perldir}/auto/Slurmdb/autosplit.ix
+#### %{_perlman3dir}/Slurm*
 
 #############################################################################
 
