@@ -1107,10 +1107,10 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 #############################################################################
 
-%files -n %{pname}-sjstat%{PROJ_DELIM}
-%defattr(-,root,root)
-%{_bindir}/sjstat
-%{_mandir}/man1/sjstat*
+### %files -n %{pname}-sjstat%{PROJ_DELIM}
+### %defattr(-,root,root)
+### %{_bindir}/sjstat
+### %{_mandir}/man1/sjstat*
 #############################################################################
 
 %if %{slurm_with pam}
