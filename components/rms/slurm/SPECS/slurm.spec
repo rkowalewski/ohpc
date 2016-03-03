@@ -105,7 +105,7 @@
 
 Name:    %{pname}%{PROJ_DELIM}
 
-Version: 15.08.8
+Version: 16.05.0
 %define ver_exp 15-08-8
 
 Release:   %{?dist}
