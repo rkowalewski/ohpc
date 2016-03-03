@@ -1006,6 +1006,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/jobcomp_filetxt.so
 %{_libdir}/slurm/jobcomp_none.so
 %{_libdir}/slurm/jobcomp_script.so
+%{_libdir}/slurm/mcs_group.so
+%{_libdir}/slurm/mcs_none.so
+%{_libdir}/slurm/mcs_user.so
 %if ! %{slurm_with bluegene}
 %{_libdir}/slurm/mpi_lam.so
 %{_libdir}/slurm/mpi_mpich1_p4.so
@@ -1014,7 +1017,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/mpi_mpichmx.so
 %{_libdir}/slurm/mpi_mvapich.so
 %{_libdir}/slurm/mpi_openmpi.so
-%if ! 0%{?OHPC_BUILD}
+%if 0%{?OHPC_BUILD}
 %{_libdir}/slurm/mpi_pmi2.so
 %endif
 %endif
