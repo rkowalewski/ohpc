@@ -41,6 +41,7 @@ Patch1: warewulf-common.system.patch
 Patch2: warewulf-common.parallelcmd.patch
 %if 0%{?suse_version}
 Requires: mysql perl-DBD-mysql
+BuildRequires: automake
 %else
 # 07/23/14 travis.post@intel.com - alternate package names for RHEL7
 %if 0%{?rhel_version} > 600 || 0%{?centos_version} > 600
