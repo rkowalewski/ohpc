@@ -20,12 +20,13 @@
 
 Name:    %{pname}%{PROJ_DELIM}
 Summary: Warewulf - Provisioning Module
-Version: 3.6
+Version: 3.7
 Release: %{_rel}%{?dist}
 License: US Dept. of Energy (BSD-like)
 Group:   ohpc/provisioning
 URL:     http://warewulf.lbl.gov/
-Source0: http://warewulf.lbl.gov/downloads/releases/warewulf-provision/warewulf-provision-%{version}.tar.gz
+#Source0: http://warewulf.lbl.gov/downloads/releases/warewulf-provision/warewulf-provision-%{version}.tar.gz
+Source0: warewulf-provision-%{version}.tar.gz
 Source1: OHPC_macros
 ExclusiveOS: linux
 Requires: warewulf-common%{PROJ_DELIM}
@@ -35,11 +36,7 @@ Conflicts: warewulf < 3
 BuildConflicts: post-build-checks
 BuildRoot: %{?_tmppath}%{!?_tmppath:/var/tmp}/%{pname}-%{version}-%{release}-root
 DocDir: %{OHPC_PUB}/doc/contrib
-Patch1: warewulf-provision.busybox.patch.bz2
-Patch2: warewulf-provision.httpdconfdir.patch
-Patch3: warewulf-provision.dhcpd.patch
-Patch4: warewulf-provision.wwnodescan.patch
-Patch5: update_file_delay.patch
+Patch1: update_file_delay.patch
 
 %description
 Warewulf >= 3 is a set of utilities designed to better enable
@@ -104,10 +101,6 @@ available the included GPL software.
 %prep
 %setup -q -n %{pname}-%{version}
 %patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
 
 %build
 %configure --localstatedir=%{wwpkgdir}
