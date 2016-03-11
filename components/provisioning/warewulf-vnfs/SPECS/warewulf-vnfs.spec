@@ -19,12 +19,13 @@
 
 Summary: Warewulf VNFS Module
 Name:    %{pname}%{PROJ_DELIM}
-Version: 3.6
+Version: 3.7
 Release: %{_rel}%{?dist}
 License: US Dept. of Energy (BSD-like)
 Group:   ohpc/provisioning
 URL:     http://warewulf.lbl.gov/
-Source:  http://warewulf.lbl.gov/downloads/releases/warewulf-vnfs/warewulf-vnfs-%{version}.tar.gz
+#Source:  http://warewulf.lbl.gov/downloads/releases/warewulf-vnfs/warewulf-vnfs-%{version}.tar.gz
+Source:  warewulf-vnfs-%{version}.tar.gz
 ExclusiveOS: linux
 Requires: warewulf-common%{PROJ_DELIM}
 Requires: pigz

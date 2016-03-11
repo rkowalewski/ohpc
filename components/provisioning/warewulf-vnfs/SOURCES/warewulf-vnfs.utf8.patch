@@ -1,14 +1,14 @@
---- warewulf-vnfs-3.6/bin/wwvnfs	2014-05-21 11:13:14.000000000 -0700
-+++ warewulf-vnfs-3.6.patch/bin/wwvnfs	2014-10-22 10:34:46.454781400 -0700
-@@ -24,6 +24,7 @@
-     require "sys/types.ph";
-     require "syscall.ph";
- }
+--- vnfs/bin/wwvnfs	2015-07-29 18:32:38.000000000 -0700
++++ vnfs.patch/bin/wwvnfs	2016-02-23 11:22:52.701111400 -0800
+@@ -12,6 +12,7 @@
+ use Warewulf::Logger;
+ use Warewulf::Config;
+ use Warewulf::Timer;
 +use Encode;
- 
- my $sysconfdir = Warewulf::ACVars::get('SYSCONFDIR');
- my $config = Warewulf::Config->new("vnfs.conf");
-@@ -303,7 +304,7 @@
+ use File::Basename;
+ use File::Copy;
+ use File::Path;
+@@ -345,7 +346,7 @@
  sub
  vnfs_create_file($)
  {
@@ -17,12 +17,22 @@
  
      if ($path) {
          if ($path =~ /^\Q$opt_chroot\E([[:print:]]*)$/) {
-@@ -328,7 +329,7 @@
-         my ($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime) = lstat("$opt_chroot/$path");
+--- vnfs/bin/wwhybridize	2011-03-26 17:12:32.000000000 -0700
++++ vnfs.patch/bin/wwhybridize	2016-03-04 11:30:00.155566200 -0800
+@@ -22,6 +22,7 @@
+ use Getopt::Long;
+ use File::Find ();
+ use Cwd 'abs_path';
++use Encode;
  
-         if (S_ISLNK($mode)) {
--            my $destination = readlink("$opt_chroot/$path");
-+            my $destination = decode_utf8(readlink("$opt_chroot/$path"));
-             &dprint("Creating symbolic link: $tmpdir/$path -> $destination\n");
-             if ($destination =~ /^([[:print:]]+)$/) {
-                 $destination = $1;
+ &Getopt::Long::config(
+    'require_order',		# don't mix non-options with options
+@@ -116,7 +117,7 @@
+    if (-l "$vnfs_root$entry") {		# the entry is a symlink!
+       (my $_dir = "$vnfs_root$entry") =~
+ 	 s/^(.*)\/[^\\]+$/$1/;		# strip off the non-directory part
+-      my $referent = readlink("$vnfs_root$entry");
++      my $referent = decode_utf8(readlink("$vnfs_root$entry"));
+       if ((my $a_referent = abs_path("$_dir/$referent"))) {
+ 	 ($referent = $a_referent) =~ s/^\Q$vnfs_root\E//;	# strip off "$vnfs_root"
+       } else {	# the referent is not relative to $vnfs_root, rather to "/"!

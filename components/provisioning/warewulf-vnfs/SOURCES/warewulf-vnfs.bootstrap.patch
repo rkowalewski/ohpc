@@ -1,5 +1,5 @@
---- warewulf-vnfs-3.6/etc/bootstrap.conf	2014-05-21 11:13:14.000000000 -0700
-+++ warewulf-vnfs-3.6.patch/etc/bootstrap.conf	2015-02-10 08:54:17.000000000 -0800
+--- vnfs/etc/bootstrap.conf	2015-09-30 15:17:18.000000000 -0700
++++ vnfs.patch/etc/bootstrap.conf	2016-03-04 11:32:38.953819500 -0800
 @@ -30,3 +30,9 @@
  modprobe += xhci-hcd, sl811-hcd, sd_mod
  # modprobe += mlx4_core log_num_mtts=20 log_mtts_per_seg=6, ib_srp
