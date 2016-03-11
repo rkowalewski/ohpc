@@ -37,6 +37,7 @@ BuildConflicts: post-build-checks
 BuildRoot: %{?_tmppath}%{!?_tmppath:/var/tmp}/%{pname}-%{version}-%{release}-root
 DocDir: %{OHPC_PUB}/doc/contrib
 Patch1: update_file_delay.patch
+Patch2: warewulf-provision.httpdconf.patch
 
 %description
 Warewulf >= 3 is a set of utilities designed to better enable
@@ -101,6 +102,7 @@ available the included GPL software.
 %prep
 %setup -q -n %{pname}-%{version}
 %patch1 -p0
+%patch2 -p1
 
 %build
 %configure --localstatedir=%{wwpkgdir}
