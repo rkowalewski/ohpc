@@ -30,6 +30,7 @@ ExclusiveOS: linux
 Requires: warewulf-common%{PROJ_DELIM}
 Requires: pigz
 BuildRequires: warewulf-common%{PROJ_DELIM}
+BuildRequires: automake
 Conflicts: warewulf < 3
 %if 0%{?sles_version} || 0%{?suse_version}
 BuildArch: x86_64
