@@ -19,12 +19,13 @@
 
 Name:    %{pname}%{PROJ_DELIM}
 Summary: A suite of tools for clustering
-Version: 3.6
+Version: 3.7
 Release: %{_rel}%{?dist}
 License: US Dept. of Energy (BSD-like)
 Group:   ohpc/provisioning
 URL:     http://warewulf.lbl.gov/
-Source0: http://warewulf.lbl.gov/downloads/releases/warewulf-common/warewulf-common-%{version}.tar.gz
+#Source0: http://warewulf.lbl.gov/downloads/releases/warewulf-common/warewulf-common-%{version}.tar.gz
+Source0: warewulf-common-%{version}.tar.gz
 Source1: OHPC_macros
 ExclusiveOS: linux
 DocDir: %{OHPC_PUB}/doc/contrib
@@ -36,13 +37,8 @@ BuildArch: x86_64
 BuildArch: noarch
 %endif
 BuildRoot: %{?_tmppath}/%{pname}-%{version}-%{release}-root
-# 09/10/14 charles.r.baird@intel.com - patch to add SuSE as a system type
 Patch1: warewulf-common.system.patch
-# 09/10/14 charles.r.baird@intel.com - patch to add mariadb as a datastore
-Patch2: warewulf-common.mariadb.patch
-# 02/03/16 charles.r.baird@intel.com - patch to add mariadb as a datastore
-Patch3: warewulf-common.file_env.patch
-# 05/23/14 charles.r.baird@intel.com - alternate package names for SuSE
+Patch2: warewulf-common.parallelcmd.patch
 %if 0%{?suse_version}
 Requires: mysql perl-DBD-mysql
 %else
@@ -70,7 +66,6 @@ supporting libs.
 %setup -q -n %{pname}-%{version}
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
 
 
 %build
