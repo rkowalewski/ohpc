@@ -51,9 +51,7 @@ Patch3: centos-add-pkgs.patch
 Patch4: warewulf-vnfs.bootstrap.patch
 # 03/11/15 karl.w.schulz@intel.com - add in centos7 template (culled from ww trunk)
 Source1: centos-7.tmpl
-# 03/13/15 karl.w.schulz@intel.com - honor local proxy setting if defined (rhel)
-Patch5: rhel-proxy.patch
-Patch6: warewulf-vnfs.pigz.patch
+Patch5: warewulf-vnfs.pigz.patch
 
 
 %description
@@ -74,7 +72,6 @@ Virtual Node FileSystem objects.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
-%patch6 -p1
 
 
 %build
