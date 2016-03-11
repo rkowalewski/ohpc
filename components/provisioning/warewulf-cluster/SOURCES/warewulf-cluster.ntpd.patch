@@ -1,0 +1,24 @@
+--- cluster/libexec/wwinit/50-ntpd.init	2015-02-11 20:14:30.000000000 -0800
++++ cluster.patch/libexec/wwinit/50-ntpd.init	2016-02-23 17:51:30.389482200 -0800
+@@ -34,6 +34,12 @@
+     wwprint "Backed up current NTP config to /etc/ntp.conf-orig\n"
+ fi
+ 
++if [ -f "/etc/ntp.keys" ]; then
++    KEY_FILE="/etc/ntp.keys"
++elif [ -f "/etc/ntp/keys" ]; then
++    KEY_FILE="/etc/ntp/keys"
++fi
++
+ cat <<EOF > /etc/ntp.conf
+ # This file was created by Warewulf/wwinit
+ #
+@@ -65,7 +71,7 @@
+ 
+ # Key file containing the keys and key identifiers used when operating
+ # with symmetric key cryptography.
+-keys /etc/ntp/keys
++keys $KEY_FILE
+ 
+ # Specify the key identifiers which are trusted.
+ #trustedkey 4 8 42
