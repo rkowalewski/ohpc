@@ -100,7 +100,7 @@ available the included GPL software.
 
 %prep
 %setup -q -n %{pname}-%{version}
-%patch1 -p1
+%patch1 -p0
 
 %build
 %configure --localstatedir=%{wwpkgdir}
