@@ -69,6 +69,9 @@ Source2:   OHPC_setup_compiler
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
+%define __spec_install_post /usr/lib/rpm/brp-compress
+%define __spec_install_post /usr/lib/rpm/brp-strip
+
 %define debug_package %{nil}
 
 %if 0%{?sles_version} || 0%{?suse_version}
