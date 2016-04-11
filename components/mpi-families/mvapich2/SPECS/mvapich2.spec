@@ -67,10 +67,6 @@ Source0:   http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/%{pname}-%{ver
 Source1:   OHPC_macros
 Source2:   OHPC_setup_compiler
 
-# karl.w.schulz@intel.com (09/08/2015)
-%global _default_patch_fuzz 2
-Patch0:    winfree.patch
-
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %define debug_package %{nil}
@@ -101,7 +97,6 @@ across multiple networks.
 %prep
 
 %setup -q -n %{pname}-%{version}
-%patch0 -p1
 
 %build
 
