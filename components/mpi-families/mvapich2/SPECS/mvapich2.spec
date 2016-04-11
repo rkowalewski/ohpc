@@ -8,6 +8,8 @@
 #
 #----------------------------------------------------------------------------eh-
 
+%global __os_install_post %{nil}
+
 # MVAPICH2 MPI stack that is dependent on compiler toolchain
 
 %define with_slurm 0
@@ -69,6 +71,7 @@ Source2:   OHPC_setup_compiler
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
+%define __spec_install_post /usr/lib/rpm/brp-strip-comment-note /bin/true
 %define __spec_install_post /usr/lib/rpm/brp-compress /bin/true
 %define __spec_install_post /usr/lib/rpm/brp-strip /bin/true
 
