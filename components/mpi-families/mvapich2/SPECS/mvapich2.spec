@@ -107,7 +107,6 @@ export OHPC_COMPILER_FAMILY=%{compiler_family}
 ./configure --prefix=%{install_path} \
 	    --enable-cxx \
 	    --enable-g=dbg \
-            --with-device=ch3:mrail \
 %if %{with_psm}
             --with-device=ch3:psm \
 %endif
@@ -115,6 +114,8 @@ export OHPC_COMPILER_FAMILY=%{compiler_family}
             --with-pm=no --with-pmi=slurm \
 %endif
 	    --enable-fast=O3 || { cat config.log && exit 1; }
+
+#	                --with-device=ch3:mrail \
 
 %install
 
