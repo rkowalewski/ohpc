@@ -105,6 +105,9 @@ set     version    ${version}
 
 # update module path hierarchy
 prepend-path    MODULEPATH          %{OHPC_MODULEDEPS}/intel
+# set CC and CXX which is used by various Makefiles and CMake
+setenv          CC                  icc
+setenv          CXX                 icpc
 
 family "compiler"
 EOF

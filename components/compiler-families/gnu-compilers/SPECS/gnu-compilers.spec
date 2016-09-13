@@ -118,6 +118,9 @@ prepend-path    MANPATH             %{install_path}/share/man
 prepend-path    INCLUDE             %{install_path}/include
 prepend-path	LD_LIBRARY_PATH	    %{install_path}/lib64
 prepend-path    MODULEPATH          %{OHPC_MODULEDEPS}/gnu
+# Set CC and CXX variables which is used by various Makefiles and CMake
+setenv          CC                  gcc
+setenv          CXX                 g++
 
 family "compiler"
 EOF
